@@ -1,27 +1,34 @@
+package main;
+
+// SistemaEncuestas.java
 import java.util.Scanner;
 import java.util.InputMismatchException;
 
 public class Main {
 
-    private static final boolean MODO_PRUEBA = true;
-    private static final int MAX_ENCUESTADOS = 60;
-    private static final int ATRIBUTOS = 6;
 
     public static void main(String[] args) {
+    	final int MIN_DNI = 10000000; final int MAX_DNI = 99999999;
+    	final int MIN_EDAD = 18; final int MAX_EDAD = 99;
+    	final int MIN_SUELDO = 0; final int MAX_SUELDO = 500000;
+        final boolean MODO_PRUEBA = true;
+        final int MAX_ENCUESTADOS = 60;
+        final int ATRIBUTOS = 6;
+        
         Scanner s = new Scanner(System.in);
         String[][] personas = new String[MAX_ENCUESTADOS][ATRIBUTOS];
         int cantidad = 0;
 
         if (MODO_PRUEBA) {
-            cantidad = cargarDatosPrueba(personas);
+            cantidad = cargarDatosPrueba(personas, ATRIBUTOS);
             System.out.println("[INFO] Se cargaron " + cantidad + " personas de prueba.\n");
         }
 
-        mostrarMenuYElegirOpcion(s, personas, cantidad);
+        mostrarMenuYElegirOpcion(s, personas, cantidad, MAX_ENCUESTADOS, ATRIBUTOS, MIN_DNI, MAX_DNI, MIN_EDAD, MAX_EDAD, MIN_SUELDO, MAX_SUELDO);
         s.close();
     }
 
-    private static int cargarDatosPrueba(String[][] personas) {
+    private static int cargarDatosPrueba(String[][] personas, final int ATRIBUTOS) {
         String[][] datos = {
                 { "12345678", "Juan Pérez", "1", "25", "1", "50000" },
                 { "23456789", "María López", "2", "30", "1", "60000" },
@@ -41,7 +48,7 @@ public class Main {
         return datos.length;
     }
 
-    private static void mostrarMenuYElegirOpcion(Scanner s, String[][] personas, int cantidadInicial) {
+    private static void mostrarMenuYElegirOpcion(Scanner s, String[][] personas, int cantidadInicial, final int MAX_ENCUESTADOS, final int ATRIBUTOS, final int MIN_DNI, final int MAX_DNI, final int MIN_EDAD, final int MAX_EDAD, final int MIN_SUELDO, final int MAX_SUELDO) {
         int cantidad = cantidadInicial;
         int opcion;
 
@@ -58,24 +65,24 @@ public class Main {
             System.out.print("Seleccione una opción (1-8): ");
 
             opcion = ingresarEntero(s, 1, 8);
-            cantidad = generarAccion(opcion, s, personas, cantidad);
+            cantidad = generarAccion(opcion, s, personas, cantidad, MAX_ENCUESTADOS, ATRIBUTOS, MIN_DNI, MAX_DNI, MIN_EDAD, MAX_EDAD, MIN_SUELDO,  MAX_SUELDO);
         } while (opcion != 8);
     }
 
-    private static int generarAccion(int opcion, Scanner s, String[][] personas, int cantidad) {
+    private static int generarAccion(int opcion, Scanner s, String[][] personas, int cantidad, final int MAX_ENCUESTADOS, final int ATRIBUTOS, final int MIN_DNI, final int MAX_DNI, final int MIN_EDAD, final int MAX_EDAD, final int MIN_SUELDO, final int MAX_SUELDO) {
         switch (opcion) {
             case 1:
-                return ingresarPersona(s, personas, cantidad);
+                return ingresarPersona(s, personas, cantidad, MAX_ENCUESTADOS, MIN_DNI, MAX_DNI, MIN_EDAD, MAX_EDAD, MIN_SUELDO, MAX_SUELDO);
             case 2:
                 if (!sistemaVacio(cantidad))
-                    consultarPersona(s, personas, cantidad);
+                    consultarPersona(s, personas, cantidad, MIN_DNI, MAX_DNI);
                 return cantidad;
             case 3:
                 if (!sistemaVacio(cantidad))
                     modificarPersona(s, personas, cantidad);
                 return cantidad;
             case 4:
-                return sistemaVacio(cantidad) ? cantidad : eliminarPersona(s, personas, cantidad);
+                return sistemaVacio(cantidad) ? cantidad : eliminarPersona(s, personas, cantidad, ATRIBUTOS);
             case 5:
                 if (!sistemaVacio(cantidad))
                     listarPersonas(personas, cantidad);
@@ -92,58 +99,57 @@ public class Main {
                 System.out.println("[INFO] Saliendo del sistema. Hasta pronto!");
                 return cantidad;
             default:
-                System.out.println("[ERROR] Opción inválida.");
+                System.err.println("[ERROR] Opción inválida.");
                 return cantidad;
         }
     }
 
     private static boolean sistemaVacio(int cantidad) {
         if (cantidad == 0) {
-            System.out.println("[ERROR] El sistema está vacío.");
+            System.err.println("[ERROR] El sistema está vacío.");
             return true;
         }
         return false;
     }
 
-    private static int ingresarPersona(Scanner s, String[][] personas, int cantidad) {
+    private static int ingresarPersona(Scanner s, String[][] personas, int cantidad, final int MAX_ENCUESTADOS, final int MIN_DNI, final int MAX_DNI, final int MIN_EDAD, final int MAX_EDAD, final int MIN_SUELDO, final int MAX_SUELDO) {
         if (cantidad >= MAX_ENCUESTADOS) {
-            System.out.println("[ERROR] Capacidad máxima alcanzada.");
+            System.err.println("[ERROR] Capacidad máxima alcanzada.");
             return cantidad;
         }
         System.out.print("Ingrese DNI (8 dígitos): ");
-        int dni = ingresarEntero(s, 10000000, 99999999);
-        if (buscarPersona(personas, cantidad, String.valueOf(dni)) != -1) {
-            System.out.println("[ERROR] El DNI ingresado ya existe.");
-            return cantidad;
-        }
+        int dni = ingresarEntero(s, MIN_DNI, MAX_DNI);
+        if(!chequearDNI(personas, cantidad, dni)) return cantidad;
+        
         s.nextLine();
         System.out.print("Ingrese nombre completo (ej. Juan Pérez): ");
-        String nombre = s.nextLine();
+        personas[cantidad][1] = String.valueOf(s.nextLine());
         System.out.print("Sexo (1: M, 2: F, 3: Otro): ");
-        int sexo = ingresarEntero(s, 1, 3);
+        personas[cantidad][2]= String.valueOf(ingresarEntero(s, 1, 3));
         System.out.print("Edad (18-99): ");
-        int edad = ingresarEntero(s, 18, 99);
+        personas[cantidad][3] = String.valueOf(ingresarEntero(s, MIN_EDAD, MAX_EDAD));
         System.out.print("¿Trabaja? (1: Sí, 2: No): ");
-        int trabaja = ingresarEntero(s, 1, 2);
-        int sueldo = 0;
-        if (trabaja == 1) {
+        personas[cantidad][4] = String.valueOf(ingresarEntero(s, 1, 2));
+        if (Integer.valueOf(personas[cantidad][4]) == 1) {
             System.out.print("Sueldo: ");
-            sueldo = ingresarEntero(s, 0, 500000);
+            personas[cantidad][5] = String.valueOf(ingresarEntero(s, MIN_SUELDO, MAX_SUELDO));
         }
-        personas[cantidad][0] = String.valueOf(dni);
-        personas[cantidad][1] = nombre;
-        personas[cantidad][2] = String.valueOf(sexo);
-        personas[cantidad][3] = String.valueOf(edad);
-        personas[cantidad][4] = String.valueOf(trabaja);
-        personas[cantidad][5] = String.valueOf(sueldo);
         System.out.println("[OK] Persona registrada con éxito.");
         return cantidad + 1;
     }
 
-    private static boolean validarDNI(String valor) {
+	public static boolean chequearDNI(String[][] personas,int cantidad, int dni) {
+		if (buscarPersona(personas, cantidad, String.valueOf(dni)) != -1) {
+            System.err.println("[ERROR] El DNI ingresado ya existe.");
+            return false;
+        }
+		return true;
+	}
+
+    private static boolean validarDNI(String valor, final int MIN_DNI, final int MAX_DNI) {
         try {
             int dni = Integer.parseInt(valor);
-            return dni >= 10000000 && dni <= 99999999;
+            return dni >= MIN_DNI && dni <= MAX_DNI;
         } catch (NumberFormatException e) {
             return false;
         }
@@ -157,16 +163,16 @@ public class Main {
         return -1;
     }
 
-    private static void consultarPersona(Scanner s, String[][] personas, int cantidad) {
+    private static void consultarPersona(Scanner s, String[][] personas, int cantidad, final int MIN_DNI, final int MAX_DNI) {
         System.out.print("Ingrese DNI: ");
         String dni = s.nextLine();
-        if (!validarDNI(dni)) {
-            System.out.println("[ERROR] DNI inválido.");
+        if (!validarDNI(dni, MIN_DNI, MAX_DNI)) {
+            System.err.println("[ERROR] DNI inválido.");
             return;
         }
         int pos = buscarPersona(personas, cantidad, dni);
         if (pos == -1)
-            System.out.println("[ERROR] Persona no encontrada.");
+            System.err.println("[ERROR] Persona no encontrada.");
         else
             imprimirPersona(personas[pos]);
     }
@@ -176,7 +182,7 @@ public class Main {
         String dni = s.nextLine();
         int pos = buscarPersona(personas, cantidad, dni);
         if (pos == -1) {
-            System.out.println("[ERROR] Persona no encontrada.");
+            System.err.println("[ERROR] Persona no encontrada.");
             return;
         }
         System.out.print("Nuevo nombre (Enter para mantener): ");
@@ -185,12 +191,12 @@ public class Main {
             personas[pos][1] = nuevoNombre;
     }
 
-    private static int eliminarPersona(Scanner s, String[][] personas, int cantidad) {
+    private static int eliminarPersona(Scanner s, String[][] personas, int cantidad, final int ATRIBUTOS) {
         System.out.print("Ingrese DNI: ");
         String dni = s.nextLine();
         int pos = buscarPersona(personas, cantidad, dni);
         if (pos == -1) {
-            System.out.println("[ERROR] Persona no encontrada.");
+            System.err.println("[ERROR] Persona no encontrada.");
             return cantidad;
         }
         for (int i = pos; i < cantidad - 1; i++) {
@@ -291,10 +297,10 @@ public class Main {
                 if (valor >= min && valor <= max) {
                     return valor;
                 } else {
-                    System.out.print("[ERROR] Valor fuera de rango. Ingrese entre " + min + " y " + max + ": ");
+                    System.err.print("[ERROR] Valor fuera de rango. Ingrese entre " + min + " y " + max + ": ");
                 }
             } catch (InputMismatchException e) {
-                System.out.print("[ERROR] Debe ingresar un número válido: ");
+                System.err.print("[ERROR] Debe ingresar un número válido: ");
                 s.nextLine();
             }
         }
