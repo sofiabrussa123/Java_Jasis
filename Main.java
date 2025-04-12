@@ -1,3 +1,5 @@
+package main;
+
 import java.util.Scanner;
 import java.util.InputMismatchException;
 
@@ -128,9 +130,8 @@ public class Main {
         }
         System.out.print("Ingrese DNI (8 dígitos): ");
         int dni = ingresarEntero(s, MIN_DNI, MAX_DNI);
-        if (!chequearDNI(personas, cantidad, dni))
-            return cantidad;
-
+        if (!chequearDNI(personas, cantidad, dni)) return cantidad;
+        
         System.out.print("Ingrese nombre completo (ej. Juan Pérez): ");
 
         personas[cantidad][1] = String.valueOf(s.nextLine());
@@ -141,12 +142,12 @@ public class Main {
 
         personas[cantidad][3] = String.valueOf(ingresarEntero(s, MIN_EDAD, MAX_EDAD));
         System.out.print("¿Trabaja? (1: Sí, 2: No): ");
-
         personas[cantidad][4] = String.valueOf(ingresarEntero(s, 1, 2));
+        
         if (Integer.valueOf(personas[cantidad][4]) == 1) {
             System.out.print("Sueldo: ");
             personas[cantidad][5] = String.valueOf(ingresarEntero(s, MIN_SUELDO, MAX_SUELDO));
-        }
+        }else personas[cantidad][5] = "0";
         System.out.println("[OK] Persona registrada con éxito.");
         return cantidad + 1;
     }
@@ -156,6 +157,7 @@ public class Main {
             System.err.println("[ERROR] El DNI ingresado ya existe.");
             return false;
         }
+        personas[cantidad][0] = String.valueOf(dni);
         return true;
     }
 
@@ -343,5 +345,4 @@ public class Main {
             }
         }
     }
-
 }
