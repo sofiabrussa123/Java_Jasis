@@ -369,6 +369,7 @@ public class Main {
     private static double obtenerPromedio(int suma, int total) {
         return total == 0 ? 0 : (suma * 1.0 / total);
     }
+    
     private static String verificarNombreMayusculas(Scanner s) {
         String nombreCompleto;
         while (true) {
@@ -396,24 +397,20 @@ public class Main {
 
     
     private static int ingresarEntero(Scanner s, int min, int max) {
-        int valor = -1;
-        boolean valido = false;
-
-        while (!valido) {
+        while (true) {
             try {
-                valor = s.nextInt();
+                int valor = s.nextInt();
+                s.nextLine(); 
+
                 if (valor >= min && valor <= max) {
-                    valido = true;
+                    return valor;
                 } else {
                     System.err.println("[ERROR] El valor debe estar entre " + min + " y " + max + ".");
                 }
             } catch (InputMismatchException e) {
                 System.err.println("[ERROR] Entrada inválida. Por favor ingrese un número entero.");
-                s.next(); 
+                s.next();
             }
         }
-
-        return valor;
     }
-
     }
