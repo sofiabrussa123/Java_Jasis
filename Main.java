@@ -261,7 +261,6 @@ public class Main {
             }
         }
 
-        // Separador para mejorar la legibilidad
         System.out.println("\n---- Estadísticas Generales ----");
         mostrarPorcentajeGeneros(genero, cantidad);
         mostrarPromedioEdad(edadTotal, cantidad);
@@ -300,7 +299,6 @@ public class Main {
             }
         }
 
-        // Separador para mostrar los sueldos
         System.out.println("\n---- Sueldos ----");
         mostrarSueldoMaxMin(maxPersona, max, minPersona, min);
     }
