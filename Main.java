@@ -1,5 +1,3 @@
-package main;
-
 import java.util.Scanner;
 import java.util.InputMismatchException;
 
@@ -88,7 +86,7 @@ public class Main {
                 return cantidad;
             case 3:
                 if (!sistemaVacio(cantidad))
-                    modificarPersona(s, personas, cantidad);
+                	 modificarPersona(s, personas, cantidad, MIN_DNI, MAX_DNI, MIN_EDAD, MAX_EDAD, MIN_SUELDO, MAX_SUELDO);
                 return cantidad;
             case 4:
                 return sistemaVacio(cantidad) ? cantidad : eliminarPersona(s, personas, cantidad, ATRIBUTOS);
@@ -114,43 +112,47 @@ public class Main {
     }
 
     private static boolean sistemaVacio(int cantidad) {
-        if (cantidad == 0) {
-            System.err.println("[ERROR] El sistema está vacío.");
-            return true;
-        }
-        return false;
-    }
+	       if (cantidad == 0) {
+	            System.err.println("[ERROR] El sistema está vacío.");
+	            return true;
+	        }
+	        return false;
+	    }
+	
+	    private static int ingresarPersona(Scanner s, String[][] personas, int cantidad, final int MAX_ENCUESTADOS,
+	            final int MIN_DNI, final int MAX_DNI, final int MIN_EDAD, final int MAX_EDAD, final int MIN_SUELDO,
+	            final int MAX_SUELDO) {
+	    if (cantidad >= MAX_ENCUESTADOS) {
+	        System.err.println("[ERROR] Capacidad máxima alcanzada.");
+	        return cantidad;
+	    }
+	    System.out.print("Ingrese DNI (8 dígitos): ");
+	    int dni = ingresarEntero(s, MIN_DNI, MAX_DNI);
+	    if (!chequearDNI(personas, cantidad, dni)) return cantidad;
+	    
+	    System.out.print("Ingrese nombre completo (ej. Juan Pérez): ");
+	    personas[cantidad][1] = verificarNombreMayusculas(s); 
+	
+	    System.out.print("Sexo (1: M, 2: F, 3: Otro): ");
+	    personas[cantidad][2] = String.valueOf(ingresarEntero(s, 1, 3));
+	    
+	    System.out.print("Edad (18-99): ");
+	    personas[cantidad][3] = String.valueOf(ingresarEntero(s, MIN_EDAD, MAX_EDAD));
+	    
+	    System.out.print("¿Trabaja? (1: Sí, 2: No): ");
+	    personas[cantidad][4] = String.valueOf(ingresarEntero(s, 1, 2));
+	    
+	    if (Integer.valueOf(personas[cantidad][4]) == 1) {
+	        System.out.print("Sueldo: ");
+	        personas[cantidad][5] = String.valueOf(ingresarEntero(s, MIN_SUELDO, MAX_SUELDO));
+	    } else {
+	        personas[cantidad][5] = "0";
+	    }
+	    
+	    System.out.println("[OK] Persona registrada con éxito.");
+	    return cantidad + 1;
+	}
 
-    private static int ingresarPersona(Scanner s, String[][] personas, int cantidad, final int MAX_ENCUESTADOS,
-            final int MIN_DNI, final int MAX_DNI, final int MIN_EDAD, final int MAX_EDAD, final int MIN_SUELDO,
-            final int MAX_SUELDO) {
-        if (cantidad >= MAX_ENCUESTADOS) {
-            System.err.println("[ERROR] Capacidad máxima alcanzada.");
-            return cantidad;
-        }
-        System.out.print("Ingrese DNI (8 dígitos): ");
-        int dni = ingresarEntero(s, MIN_DNI, MAX_DNI);
-        if (!chequearDNI(personas, cantidad, dni)) return cantidad;
-        
-        System.out.print("Ingrese nombre completo (ej. Juan Pérez): ");
-
-        personas[cantidad][1] = String.valueOf(s.nextLine());
-        System.out.print("Sexo (1: M, 2: F, 3: Otro): ");
-
-        personas[cantidad][2] = String.valueOf(ingresarEntero(s, 1, 3));
-        System.out.print("Edad (18-99): ");
-
-        personas[cantidad][3] = String.valueOf(ingresarEntero(s, MIN_EDAD, MAX_EDAD));
-        System.out.print("¿Trabaja? (1: Sí, 2: No): ");
-        personas[cantidad][4] = String.valueOf(ingresarEntero(s, 1, 2));
-        
-        if (Integer.valueOf(personas[cantidad][4]) == 1) {
-            System.out.print("Sueldo: ");
-            personas[cantidad][5] = String.valueOf(ingresarEntero(s, MIN_SUELDO, MAX_SUELDO));
-        }else personas[cantidad][5] = "0";
-        System.out.println("[OK] Persona registrada con éxito.");
-        return cantidad + 1;
-    }
 
     public static boolean chequearDNI(String[][] personas, int cantidad, int dni) {
         if (buscarPersona(personas, cantidad, String.valueOf(dni)) != -1) {
@@ -193,19 +195,59 @@ public class Main {
             imprimirPersona(personas[pos]);
     }
 
-    private static void modificarPersona(Scanner s, String[][] personas, int cantidad) {
-        System.out.print("Ingrese DNI de la persona a modificar: ");
-        String dni = s.nextLine();
-        int pos = buscarPersona(personas, cantidad, dni);
-        if (pos == -1) {
-            System.err.println("[ERROR] Persona no encontrada.");
-            return;
-        }
-        System.out.print("Nuevo nombre (Enter para mantener): ");
-        String nuevoNombre = s.nextLine();
-        if (!nuevoNombre.isEmpty())
-            personas[pos][1] = nuevoNombre;
-    }
+    private static void modificarPersona(Scanner s, String[][] personas, int cantidad, final int MIN_DNI, final int MAX_DNI,
+            final int MIN_EDAD, final int MAX_EDAD, final int MIN_SUELDO, final int MAX_SUELDO) {
+		System.out.print("Ingrese DNI de la persona a modificar: ");
+		int dni = ingresarEntero(s, MIN_DNI, MAX_DNI);
+		int pos = buscarPersona(personas, cantidad, String.valueOf(dni));
+		if (pos == -1) {
+		System.err.println("[ERROR] Persona no encontrada.");
+		return;
+		}
+		
+		System.out.print("Nuevo nombre completo (Enter para mantener): ");
+		String nuevoNombre = s.nextLine();
+		if (!nuevoNombre.isEmpty())
+		personas[pos][1] = nuevoNombre;
+		
+		System.out.print("Nuevo sexo (1: M, 2: F, 3: Otro, Enter para mantener): ");
+		String nuevoSexo = s.nextLine();
+		if (!nuevoSexo.isEmpty())
+		personas[pos][2] = nuevoSexo;
+		
+		System.out.print("Nueva edad (" + MIN_EDAD + "-" + MAX_EDAD + ", Enter para mantener): ");
+		String nuevaEdad = s.nextLine();
+		if (!nuevaEdad.isEmpty()) {
+		int edad = Integer.parseInt(nuevaEdad);
+		if (edad >= MIN_EDAD && edad <= MAX_EDAD) {
+		personas[pos][3] = nuevaEdad;
+		} else {
+		System.err.println("[ERROR] Edad fuera de rango.");
+		}
+		}
+		
+		System.out.print("¿Trabaja? (1: Sí, 2: No, Enter para mantener): ");
+		String trabaja = s.nextLine();
+		if (!trabaja.isEmpty()) {
+		personas[pos][4] = trabaja;
+		}
+		
+		if (Integer.parseInt(personas[pos][4]) == 1) {
+		System.out.print("Nuevo sueldo (" + MIN_SUELDO + "-" + MAX_SUELDO + "): ");
+		String nuevoSueldo = s.nextLine();
+		if (!nuevoSueldo.isEmpty()) {
+		int sueldo = Integer.parseInt(nuevoSueldo);
+		if (sueldo >= MIN_SUELDO && sueldo <= MAX_SUELDO) {
+		personas[pos][5] = nuevoSueldo;
+		} else {
+		System.err.println("[ERROR] Sueldo fuera de rango.");
+		}
+		}
+		} else {
+		personas[pos][5] = "0"; 
+		}
+		}
+
 
     private static int eliminarPersona(Scanner s, String[][] personas, int cantidad, final int ATRIBUTOS) {
         System.out.print("Ingrese DNI: ");
@@ -327,20 +369,51 @@ public class Main {
     private static double obtenerPromedio(int suma, int total) {
         return total == 0 ? 0 : (suma * 1.0 / total);
     }
-
-    private static int ingresarEntero(Scanner s, int min, int max) {
-        int numero;
+    private static String verificarNombreMayusculas(Scanner s) {
+        String nombreCompleto;
         while (true) {
-            try {
-                numero = Integer.parseInt(s.nextLine());
-                if (numero >= min && numero <= max) {
-                    return numero;
-                } else {
-                    System.out.println("Por favor, ingrese un número entre " + min + " y " + max + ".");
+            nombreCompleto = s.nextLine();
+            String[] partes = nombreCompleto.split(" ");
+            
+           
+            boolean valido = true;
+            for (String parte : partes) {
+                if (parte.isEmpty()) continue; 
+                if (!Character.isUpperCase(parte.charAt(0))) {
+                    valido = false;
+                    break;
                 }
-            } catch (NumberFormatException e) {
-                System.out.println("Entrada inválida. Intente nuevamente.");
+            }
+            
+            if (valido) {
+                break;
+            } else {
+                System.out.println("[ERROR] El nombre y apellido deben empezar con mayúscula. Intente nuevamente.");
             }
         }
+        return nombreCompleto;
     }
-}
+
+    
+    private static int ingresarEntero(Scanner s, int min, int max) {
+        int valor = -1;
+        boolean valido = false;
+
+        while (!valido) {
+            try {
+                valor = s.nextInt();
+                if (valor >= min && valor <= max) {
+                    valido = true;
+                } else {
+                    System.err.println("[ERROR] El valor debe estar entre " + min + " y " + max + ".");
+                }
+            } catch (InputMismatchException e) {
+                System.err.println("[ERROR] Entrada inválida. Por favor ingrese un número entero.");
+                s.next(); 
+            }
+        }
+
+        return valor;
+    }
+
+    }
